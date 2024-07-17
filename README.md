@@ -15,86 +15,44 @@ This assumes you are using the latest nightly build or GitHub master of the Odin
 
 ## 1. Cloning the sources
 ```console
-git clone --recurse-submodules https://github.com/oskarnp/odin-tracy
-```
-Or if you already had this repo cloned:
-```console
-git submodule update --init
+git clone https://github.com/oskarnp/odin-tracy
 ```
 
 ## 2. Building the Tracy profiler server
 
-### Mac OS
-#### Install dependencies
+Tracy profiler server is built using CMake version 3.16 or later.
+
+Example (using Ninja build system):
+
 ```console
-brew install pkg-config glfw freetype capstone
-```
-#### Build profiler server
-```console
-cd tracy/profiler/build/unix
-make release
-```
-#### Run profiler server
-```console
-./tracy/profiler/build/unix/Tracy-release
+cmake -G Ninja -S vendor/tracy/profiler -B build/tracy-profiler
+cmake --build build/tracy-profiler
 ```
 
-## Windows
-#### Install dependencies
-This will download and install external dependencies (glfw3, libcapstone, libfreetype) to vcpkg local directory. This writes files only to the vcpkg\vcpkg directory and makes no other changes on your machine.
-```console
-cd tracy\vcpkg
-install_vcpkg_dependencies.bat
-```
-#### Build profiler server
-This requires Visual Studio installed. Open "x64 Native Tools Command Prompt for VS 20XX" and run commands below.
-```console
-cd tracy\profiler\build\win32
-msbuild Tracy.sln -t:Build -p:Configuration=Release
-```
-(or open solution with Visual Studio and build from there)
-#### Run profiler server
-```console
-x64\Release\Tracy.exe
-```
-
-## Linux
-
-### Install dependencies
-* pkg-config
-* freetype2
-* capstone
-* glfw3 (glfw-x11)
-  * (Only required if using LEGACY=1 below, otherwise not required and
-    profiler server will use Wayland instead.)
-
-#### Build profiler server
-```console
-cd tracy/profiler/build/unix
-make release LEGACY=1
-```
 > [!NOTE]
-> Remove LEGACY=1 above to use Wayland instead of GLFW.
+> Add `-D LEGACY=ON` to first line to configure for X11 instead of Wayland if you are on Linux.
 
-#### Run profiler server
-```console
-./tracy/profiler/build/unix/Tracy-release
-```
+Refer to official manual for more details.
+
 
 ## 3. Building the Tracy profiler client library
 
+Tracy profiler library is _optionally_ built using CMake version 3.10 or later. See vendor/tracy/CMakeLists.txt for more information.
+
+If you prefer to not use CMake you can build the client directly:
+
 ### Mac OS
 ```console
-c++ -stdlib=libc++ -mmacosx-version-min=10.8 -std=c++11 -DTRACY_ENABLE -O2 -dynamiclib tracy/public/TracyClient.cpp  -o tracy.dylib
+c++ -stdlib=libc++ -mmacosx-version-min=10.8 -std=c++11 -DTRACY_ENABLE -O2 -dynamiclib vendor/tracy/public/TracyClient.cpp  -o tracy.dylib
 ```
 ### Windows
 ```console
-cl -MT -O2 -DTRACY_ENABLE -c tracy\public\TracyClient.cpp -Fotracy
+cl -MT -O2 -DTRACY_ENABLE -c vendor\tracy\public\TracyClient.cpp -Fotracy
 lib tracy.obj
 ```
 ### Linux
 ```console
-c++ -std=c++11 -DTRACY_ENABLE -O2 tracy/public/TracyClient.cpp -shared -fPIC -o tracy.so
+c++ -std=c++11 -DTRACY_ENABLE -O2 vendor/tracy/public/TracyClient.cpp -shared -fPIC -o tracy.so
 ```
 
 ## 4. (Optional) Run the demo application / profiler client
