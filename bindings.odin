@@ -135,7 +135,7 @@ foreign tracy {
 	___tracy_emit_frame_mark                            :: proc( name: cstring ) ---
 	___tracy_emit_frame_mark_start                      :: proc( name: cstring ) ---
 	___tracy_emit_frame_mark_end                        :: proc( name: cstring ) ---
-	___tracy_emit_frame_image                           :: proc( image: rawptr, w, h: u16, offset: u8, flip: i32 ) ---
+	___tracy_emit_frame_image                           :: proc( image: rawptr, w, h: u16, offset: u8, flip: b32 ) ---
 
 	___tracy_emit_plot                                  :: proc( name: cstring, val: f64 ) ---
 	___tracy_emit_plot_float                            :: proc( name: cstring, val: f32 ) ---

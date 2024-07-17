@@ -79,7 +79,7 @@ SecureFreeNS  :: SecureFreeN
 @(disabled=!TRACY_ENABLE) FrameMark      :: #force_inline proc(name: cstring = nil)                             { ___tracy_emit_frame_mark(name) }
 @(disabled=!TRACY_ENABLE) FrameMarkStart :: #force_inline proc(name: cstring)                                   { ___tracy_emit_frame_mark_start(name) }
 @(disabled=!TRACY_ENABLE) FrameMarkEnd   :: #force_inline proc(name: cstring)                                   { ___tracy_emit_frame_mark_end(name) }
-@(disabled=!TRACY_ENABLE) FrameImage     :: #force_inline proc(image: rawptr, w, h: u16, offset: u8, flip: i32) { ___tracy_emit_frame_image(image, w, h, offset, flip) }
+@(disabled=!TRACY_ENABLE) FrameImage     :: #force_inline proc(image: rawptr, w, h: u16, offset: u8, flip: b32) { ___tracy_emit_frame_image(image, w, h, offset, flip) }
 
 // Plots and messages
 @(disabled=!TRACY_ENABLE) Plot       :: #force_inline proc(name: cstring, value: f64) { ___tracy_emit_plot(name, value) }
