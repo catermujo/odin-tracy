@@ -8,10 +8,10 @@ when ODIN_OS == .Linux   do foreign import tracy "tracy.so"
 
 TracyPlotFormatEnum :: enum i32
 {
-    TracyPlotFormatNumber,
-    TracyPlotFormatMemory,
-    TracyPlotFormatPercentage,
-    TracyPlotFormatWatt
+	TracyPlotFormatNumber,
+	TracyPlotFormatMemory,
+	TracyPlotFormatPercentage,
+	TracyPlotFormatWatt
 }
 
 ___tracy_source_location_data :: struct {
@@ -30,37 +30,37 @@ ___tracy_c_zone_context :: struct {
 ___tracy_gpu_time_data :: struct {
 	gpuTime:  i64,
 	queryId:  u16,
-	_context: u8,
+	_context: u8, // NOTE(oskar): `context` is a reserved identifier in Odin.
 }
 
 ___tracy_gpu_zone_begin_data :: struct {
 	srcloc:   u64,
 	queryId:  u16,
-	_context: u8,
+	_context: u8, // NOTE(oskar): `context` is a reserved identifier in Odin.
 }
 
 ___tracy_gpu_zone_begin_callstack_data :: struct {
 	srcloc:   u64,
 	depth:    i32,
 	queryId:  u16,
-	_context: u8,
+	_context: u8, // NOTE(oskar): `context` is a reserved identifier in Odin.
 }
 
 ___tracy_gpu_zone_end_data :: struct {
 	queryId:  u16,
-	_context: u8,
+	_context: u8, // NOTE(oskar): `context` is a reserved identifier in Odin.
 }
 
 ___tracy_gpu_new_context_data :: struct {
 	gpuTime:  i64,
 	period:   f32,
-	_context: u8,
+	_context: u8, // NOTE(oskar): `context` is a reserved identifier in Odin.
 	flags:    u8,
 	type:     u8,
 }
 
 ___tracy_gpu_context_name_data :: struct {
-	_context: u8,
+	_context: u8, // NOTE(oskar): `context` is a reserved identifier in Odin.
 	name:     cstring,
 	len:      u16,
 }
@@ -68,14 +68,22 @@ ___tracy_gpu_context_name_data :: struct {
 ___tracy_gpu_calibration_data :: struct {
 	gpuTime:   i64,
 	cpuDelta:  i64,
-	_context:  u8,
+	_context:  u8, // NOTE(oskar): `context` is a reserved identifier in Odin.
 }
+
+___tracy_gpu_time_sync_data :: struct {
+	gpuTime:  i64,
+	_context: u8, // NOTE(oskar): `context` is a reserved identifier in Odin.
+};
+
+__tracy_lockable_context_data :: struct {} // NOTE(oskar): opaque
 
 when #config(TRACY_MANUAL_LIFETIME, false) {
 	@(default_calling_convention="c")
 	foreign tracy {
 		___tracy_startup_profiler  :: proc() ---
 		___tracy_shutdown_profiler :: proc() ---
+		___tracy_profiler_started  :: proc() -> b32 ---
 	}
 }
 
@@ -83,8 +91,8 @@ when #config(TRACY_MANUAL_LIFETIME, false) {
 foreign tracy {
 	___tracy_set_thread_name                            :: proc( name: cstring ) ---
 
-	___tracy_alloc_srcloc                               :: proc( line: u32, source: cstring, sourceSz: c.size_t, function: cstring, functionSz: c.size_t ) -> u64 ---
-	___tracy_alloc_srcloc_name                          :: proc( line: u32, source: cstring, sourceSz: c.size_t, function: cstring, functionSz: c.size_t, name: cstring, nameSz: c.size_t ) -> u64 ---
+	___tracy_alloc_srcloc                               :: proc( line: u32, source: cstring, sourceSz: c.size_t, function: cstring, functionSz: c.size_t, color: u32 = 0 ) -> u64 ---
+	___tracy_alloc_srcloc_name                          :: proc( line: u32, source: cstring, sourceSz: c.size_t, function: cstring, functionSz: c.size_t, name: cstring, nameSz: c.size_t, color: u32 = 0 ) -> u64 ---
 
 	___tracy_emit_zone_begin                            :: proc( srcloc: ^___tracy_source_location_data, active: b32 ) -> ___tracy_c_zone_context ---
 	___tracy_emit_zone_begin_callstack                  :: proc( srcloc: ^___tracy_source_location_data, depth: i32, active: b32 ) -> ___tracy_c_zone_context ---
@@ -105,6 +113,7 @@ foreign tracy {
 	___tracy_emit_gpu_new_context                       :: proc( ___tracy_gpu_new_context_data ) ---
 	___tracy_emit_gpu_context_name                      :: proc( ___tracy_gpu_context_name_data ) ---
 	___tracy_emit_gpu_calibration                       :: proc( ___tracy_gpu_calibration_data ) ---
+	___tracy_emit_gpu_time_sync                         :: proc( ___tracy_gpu_time_sync_data ) ---
 
 	___tracy_emit_gpu_zone_begin_serial                 :: proc( ___tracy_gpu_zone_begin_data ) ---
 	___tracy_emit_gpu_zone_begin_callstack_serial       :: proc( ___tracy_gpu_zone_begin_callstack_data ) ---
@@ -115,6 +124,7 @@ foreign tracy {
 	___tracy_emit_gpu_new_context_serial                :: proc( ___tracy_gpu_new_context_data ) ---
 	___tracy_emit_gpu_context_name_serial               :: proc( ___tracy_gpu_context_name_data ) ---
 	___tracy_emit_gpu_calibration_serial                :: proc( ___tracy_gpu_calibration_data ) ---
+	___tracy_emit_gpu_time_sync_serial                  :: proc( ___tracy_gpu_time_sync_data ) ---
 
 	___tracy_connected                                  :: proc() -> b32 ---
 
@@ -143,6 +153,20 @@ foreign tracy {
 	___tracy_emit_plot_config                           :: proc( name: cstring, type: TracyPlotFormatEnum, step, fill: b32, color: u32 ) ---
 	___tracy_emit_message_appinfo                       :: proc( txt: cstring, size: c.size_t ) ---
 
-	___tracy_fiber_enter                                :: proc( fiber: cstring ) ---
-	___tracy_fiber_leave                                :: proc() ---
+	___tracy_announce_lockable_ctx                      :: proc( srcloc: ^___tracy_source_location_data ) -> ^__tracy_lockable_context_data ---
+	___tracy_terminate_lockable_ctx                     :: proc( lockdata: ^__tracy_lockable_context_data ) ---
+	___tracy_before_lock_lockable_ctx                   :: proc( lockdata: ^__tracy_lockable_context_data ) -> b32 ---
+	___tracy_after_lock_lockable_ctx                    :: proc( lockdata: ^__tracy_lockable_context_data ) ---
+	___tracy_after_unlock_lockable_ctx                  :: proc( lockdata: ^__tracy_lockable_context_data ) ---
+	___tracy_after_try_lock_lockable_ctx                :: proc( lockdata: ^__tracy_lockable_context_data, acquired: b32 ) ---
+	___tracy_mark_lockable_ctx                          :: proc( lockdata: ^__tracy_lockable_context_data, srcloc: ^___tracy_source_location_data ) ---
+	___tracy_custom_name_lockable_ctx                   :: proc( lockdata: ^__tracy_lockable_context_data, name: cstring, nameSz: c.size_t ) ---
+}
+
+when #config(TRACY_FIBERS, false) {
+    @(default_calling_convention="c")
+    foreign tracy {
+		___tracy_fiber_enter                            :: proc( fiber: cstring ) ---
+		___tracy_fiber_leave                            :: proc() ---
+    }
 }
