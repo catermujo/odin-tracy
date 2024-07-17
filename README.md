@@ -22,10 +22,10 @@ git clone https://github.com/oskarnp/odin-tracy
 
 Tracy profiler server is built using CMake version 3.16 or later.
 
-Example (using Ninja build system):
+Example (using Clang compiler and Ninja build system):
 
 ```console
-cmake -G Ninja -S vendor/tracy/profiler -B build/tracy-profiler
+CXX=clang++ CC=clang cmake -G Ninja -S vendor/tracy/profiler -B build/tracy-profiler
 cmake --build build/tracy-profiler
 ```
 
