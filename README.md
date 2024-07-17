@@ -71,4 +71,4 @@ and then click Connect in Tracy profiler server.
 ---
 
 > [!IMPORTANT]
-> For more details on how to use Tracy, please refer to the [official manual](https://github.com/wolfpld/tracy/releases/download/v0.10/tracy.pdf).
+> For more details on how to use Tracy, please refer to the [official manual](https://github.com/wolfpld/tracy/releases/download/v0.11.0/tracy.pdf).
