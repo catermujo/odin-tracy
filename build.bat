@@ -2,7 +2,7 @@
 
 setlocal EnableDelayedExpansion
 
-if not exist tracy\NUL (
+if not exist tracy (
     git clone --recurse-submodules https://github.com/wolfpld/tracy -b v0.13.0 --depth=1
 )
 
