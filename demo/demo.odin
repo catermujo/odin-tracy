@@ -1,7 +1,7 @@
 package demo
 
 import tracy ".."
-#assert(tracy.TRACY_ENABLE, "TRACY_ENABLE need to be set to true for this demo to be useful.")
+#assert(tracy.ENABLE, "TRACY_ENABLE need to be set to true for this demo to be useful.")
 
 import "base:runtime"
 import "core:fmt"

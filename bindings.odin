@@ -81,7 +81,7 @@ GpuTimeSync :: struct {
 
 LockCtx :: struct {}
 
-when #config(TRACY_MANUAL_LIFETIME, false) {
+when #config(MANUAL_LIFETIME, false) {
     @(default_calling_convention = "c")
     foreign tracy {
         startup_profiler :: proc() ---
@@ -170,7 +170,7 @@ foreign tracy {
     _custom_name_lockable_ctx :: proc(lockdata: ^LockCtx, name: cstring, nameSz: c.size_t) ---
 }
 
-when TRACY_FIBERS {
+when FIBERS {
     @(default_calling_convention = "c", link_prefix = "___tracy_")
     foreign tracy {
         _fiber_enter :: proc(fiber: cstring) ---

@@ -12,7 +12,7 @@ ProfiledAllocator :: struct {
 
 make_profiled_allocator :: proc(
     self: ^ProfiledAllocator,
-    callstack_size: i32 = TRACY_CALLSTACK,
+    callstack_size: i32 = CALLSTACK,
     secure: b32 = false,
     backing := context.allocator,
 ) -> mem.Allocator {
@@ -68,7 +68,7 @@ make_profiled_allocator :: proc(
 
 @(private = "file")
 emit_alloc :: #force_inline proc(new_memory: []byte, size: int, callstack_size: i32, secure: b32) {
-    when TRACY_HAS_CALLSTACK {
+    when HAS_CALLSTACK {
         if callstack_size > 0 {
             _emit_memory_alloc_callstack(raw_data(new_memory), c.size_t(size), callstack_size, secure)
         } else {
@@ -82,7 +82,7 @@ emit_alloc :: #force_inline proc(new_memory: []byte, size: int, callstack_size: 
 @(private = "file")
 EmitFree :: #force_inline proc(old_memory: rawptr, callstack_size: i32, secure: b32) {
     if old_memory == nil { return }
-    when TRACY_HAS_CALLSTACK {
+    when HAS_CALLSTACK {
         if callstack_size > 0 {
             _emit_memory_free_callstack(old_memory, callstack_size, secure)
         } else {
