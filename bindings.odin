@@ -134,16 +134,24 @@ foreign tracy {
     _emit_zone_value :: proc(ctx: ZoneCtx, value: u64) ---
 
     _connected :: proc() -> b32 ---
+}
 
-    _emit_memory_alloc :: proc(ptr: rawptr, size: c.size_t, secure: b32) ---
-    _emit_memory_alloc_callstack :: proc(ptr: rawptr, size: c.size_t, depth: i32, secure: b32) ---
-    _emit_memory_free :: proc(ptr: rawptr, secure: b32) ---
-    _emit_memory_free_callstack :: proc(ptr: rawptr, depth: i32, secure: b32) ---
-    _emit_memory_alloc_named :: proc(ptr: rawptr, size: c.size_t, secure: b32, name: cstring) ---
-    _emit_memory_alloc_callstack_named :: proc(ptr: rawptr, size: c.size_t, depth: i32, secure: b32, name: cstring) ---
-    _emit_memory_free_named :: proc(ptr: rawptr, secure: b32, name: cstring) ---
-    _emit_memory_free_callstack_named :: proc(ptr: rawptr, depth: i32, secure: b32, name: cstring) ---
+// Memory emit functions are non-private so they can be called from proc "c"
+// callbacks in C-library Tracy hooks (SDL, FMOD) without needing an Odin context.
+@(default_calling_convention = "c", link_prefix = "___tracy_")
+foreign tracy {
+    emit_memory_alloc :: proc(ptr: rawptr, size: c.size_t, secure: b32) ---
+    emit_memory_alloc_callstack :: proc(ptr: rawptr, size: c.size_t, depth: i32, secure: b32) ---
+    emit_memory_free :: proc(ptr: rawptr, secure: b32) ---
+    emit_memory_free_callstack :: proc(ptr: rawptr, depth: i32, secure: b32) ---
+    emit_memory_alloc_named :: proc(ptr: rawptr, size: c.size_t, secure: b32, name: cstring) ---
+    emit_memory_alloc_callstack_named :: proc(ptr: rawptr, size: c.size_t, depth: i32, secure: b32, name: cstring) ---
+    emit_memory_free_named :: proc(ptr: rawptr, secure: b32, name: cstring) ---
+    emit_memory_free_callstack_named :: proc(ptr: rawptr, depth: i32, secure: b32, name: cstring) ---
+}
 
+@(default_calling_convention = "c", link_prefix = "___tracy", private)
+foreign tracy {
     _emit_message :: proc(txt: cstring, size: c.size_t, callstack: i32) ---
     _emit_messageL :: proc(txt: cstring, callstack: i32) ---
     _emit_messageC :: proc(txt: cstring, size: c.size_t, color: u32, callstack: i32) ---

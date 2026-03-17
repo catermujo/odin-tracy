@@ -94,13 +94,13 @@ alloc :: #force_inline proc(
     ptr: rawptr,
     size: c.size_t,
     depth: i32 = CALLSTACK,
-) {when HAS_CALLSTACK { _emit_memory_alloc_callstack(ptr, size, depth, false) } else {emit_memory_alloc(
+) {when HAS_CALLSTACK { emit_memory_alloc_callstack(ptr, size, depth, false) } else {emit_memory_alloc(
             ptr,
             size,
             false,
         )}}
 @(disabled = !ENABLE)
-free :: #force_inline proc(ptr: rawptr, depth: i32 = CALLSTACK) { when HAS_CALLSTACK { _emit_memory_free_callstack(
+free :: #force_inline proc(ptr: rawptr, depth: i32 = CALLSTACK) { when HAS_CALLSTACK { emit_memory_free_callstack(
             ptr,
             depth,
             false,
@@ -110,7 +110,7 @@ secure_alloc :: #force_inline proc(
     ptr: rawptr,
     size: c.size_t,
     depth: i32 = CALLSTACK,
-) {when HAS_CALLSTACK { _emit_memory_alloc_callstack(ptr, size, depth, true) } else {emit_memory_alloc(
+) {when HAS_CALLSTACK { emit_memory_alloc_callstack(ptr, size, depth, true) } else {emit_memory_alloc(
             ptr,
             size,
             true,
@@ -119,14 +119,14 @@ secure_alloc :: #force_inline proc(
 secure_free :: #force_inline proc(
     ptr: rawptr,
     depth: i32 = CALLSTACK,
-) { when HAS_CALLSTACK { _emit_memory_free_callstack(ptr, depth, true) } else { emit_memory_free(ptr, true) } }
+) { when HAS_CALLSTACK { emit_memory_free_callstack(ptr, depth, true) } else { emit_memory_free(ptr, true) } }
 @(disabled = !ENABLE)
 allocn :: #force_inline proc(
     ptr: rawptr,
     size: c.size_t,
     name: cstring,
     depth: i32 = CALLSTACK,
-) {when HAS_CALLSTACK {_emit_memory_alloc_callstack_named(
+) {when HAS_CALLSTACK {emit_memory_alloc_callstack_named(
             ptr,
             size,
             depth,
@@ -138,7 +138,7 @@ freen :: #force_inline proc(
     ptr: rawptr,
     name: cstring,
     depth: i32 = CALLSTACK,
-) {when HAS_CALLSTACK {_emit_memory_free_callstack_named(ptr, depth, false, name)} else { emit_memory_free_named(
+) {when HAS_CALLSTACK {emit_memory_free_callstack_named(ptr, depth, false, name)} else { emit_memory_free_named(
             ptr,
             false,
             name,
@@ -149,7 +149,7 @@ secure_allocn :: #force_inline proc(
     size: c.size_t,
     name: cstring,
     depth: i32 = CALLSTACK,
-) {when HAS_CALLSTACK {_emit_memory_alloc_callstack_named(
+) {when HAS_CALLSTACK {emit_memory_alloc_callstack_named(
             ptr,
             size,
             depth,
@@ -161,7 +161,7 @@ secure_freen :: #force_inline proc(
     ptr: rawptr,
     name: cstring,
     depth: i32 = CALLSTACK,
-) {when HAS_CALLSTACK { _emit_memory_free_callstack_named(ptr, depth, true, name) } else {emit_memory_free_named(
+) {when HAS_CALLSTACK { emit_memory_free_callstack_named(ptr, depth, true, name) } else {emit_memory_free_named(
             ptr,
             true,
             name,

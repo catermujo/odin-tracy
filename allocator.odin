@@ -70,12 +70,12 @@ make_profiled_allocator :: proc(
 emit_alloc :: #force_inline proc(new_memory: []byte, size: int, callstack_size: i32, secure: b32) {
     when HAS_CALLSTACK {
         if callstack_size > 0 {
-            _emit_memory_alloc_callstack(raw_data(new_memory), c.size_t(size), callstack_size, secure)
+            emit_memory_alloc_callstack(raw_data(new_memory), c.size_t(size), callstack_size, secure)
         } else {
-            _emit_memory_alloc(raw_data(new_memory), c.size_t(size), secure)
+            emit_memory_alloc(raw_data(new_memory), c.size_t(size), secure)
         }
     } else {
-        _emit_memory_alloc(raw_data(new_memory), c.size_t(size), secure)
+        emit_memory_alloc(raw_data(new_memory), c.size_t(size), secure)
     }
 }
 
@@ -84,12 +84,12 @@ EmitFree :: #force_inline proc(old_memory: rawptr, callstack_size: i32, secure: 
     if old_memory == nil { return }
     when HAS_CALLSTACK {
         if callstack_size > 0 {
-            _emit_memory_free_callstack(old_memory, callstack_size, secure)
+            emit_memory_free_callstack(old_memory, callstack_size, secure)
         } else {
-            _emit_memory_free(old_memory, secure)
+            emit_memory_free(old_memory, secure)
         }
     } else {
-        _emit_memory_free(old_memory, secure)
+        emit_memory_free(old_memory, secure)
     }
 }
 
