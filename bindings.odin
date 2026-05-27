@@ -7,7 +7,13 @@ when ODIN_OS == .Darwin {
 } else when ODIN_OS == .Windows {
     foreign import tracy "tracy.lib"
 } else when ODIN_OS == .Linux {
-    foreign import tracy "tracy.so"
+    when ODIN_ARCH == .amd64 {
+        foreign import tracy "linux_x64/tracy.so"
+    } else when ODIN_ARCH == .arm64 {
+        foreign import tracy "linux_arm64/tracy.so"
+    } else {
+        #panic("vendor/tracy supports only linux amd64/arm64")
+    }
 }
 
 TracyPlotFormat :: enum i32 {
@@ -185,4 +191,3 @@ when FIBERS {
         _fiber_leave :: proc() ---
     }
 }
-
