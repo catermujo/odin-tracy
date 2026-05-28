@@ -15,10 +15,18 @@ linux_arch_dir() {
 echo "Building project..."
 CMAKE_OPTS=(-D CMAKE_BUILD_TYPE=Release)
 if [ "$(uname -s)" = 'Linux' ]; then
+    USE_LEGACY_BACKEND=0
     CMAKE_OPTS+=(-D "CMAKE_CXX_FLAGS=-include cstdint -include cinttypes")
     if ! pkg-config --exists egl wayland-egl wayland-cursor xkbcommon; then
         echo "Wayland dev packages missing; enabling LEGACY backend"
-        CMAKE_OPTS+=(-D LEGACY=ON)
+        USE_LEGACY_BACKEND=1
+    fi
+    if ! command -v wayland-scanner >/dev/null 2>&1; then
+        echo "wayland-scanner missing; enabling LEGACY backend"
+        USE_LEGACY_BACKEND=1
+    fi
+    if [ "$USE_LEGACY_BACKEND" -eq 1 ]; then
+        CMAKE_OPTS+=(-D LEGACY=ON -D GLFW_BUILD_WAYLAND=OFF -D GLFW_BUILD_X11=ON)
     fi
 fi
 CXX=clang++ CC=clang cmake -G Ninja -S tracy/profiler -B build/tracy-profiler "${CMAKE_OPTS[@]}"
