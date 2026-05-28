@@ -16,6 +16,10 @@ echo "Building project..."
 CMAKE_OPTS=(-D CMAKE_BUILD_TYPE=Release)
 if [ "$(uname -s)" = 'Linux' ]; then
     CMAKE_OPTS+=(-D "CMAKE_CXX_FLAGS=-include cstdint -include cinttypes")
+    if ! pkg-config --exists egl wayland-egl wayland-cursor xkbcommon; then
+        echo "Wayland dev packages missing; enabling LEGACY backend"
+        CMAKE_OPTS+=(-D LEGACY=ON)
+    fi
 fi
 CXX=clang++ CC=clang cmake -G Ninja -S tracy/profiler -B build/tracy-profiler "${CMAKE_OPTS[@]}"
 cmake --build build/tracy-profiler --config Release --parallel
