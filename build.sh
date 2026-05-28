@@ -13,7 +13,11 @@ linux_arch_dir() {
 }
 
 echo "Building project..."
-CXX=clang++ CC=clang cmake -G Ninja -S tracy/profiler -B build/tracy-profiler -D CMAKE_BUILD_TYPE=Release
+CMAKE_OPTS=(-D CMAKE_BUILD_TYPE=Release)
+if [ "$(uname -s)" = 'Linux' ]; then
+    CMAKE_OPTS+=(-D "CMAKE_CXX_FLAGS=-include cstdint -include cinttypes")
+fi
+CXX=clang++ CC=clang cmake -G Ninja -S tracy/profiler -B build/tracy-profiler "${CMAKE_OPTS[@]}"
 cmake --build build/tracy-profiler --config Release --parallel
 if [ $(uname -s) = 'Darwin' ]; then
     c++ -stdlib=libc++ -mmacosx-version-min=10.8 -std=c++11 -DTRACY_ENABLE -O2 -dynamiclib tracy/public/TracyClient.cpp -o tracy.dylib
