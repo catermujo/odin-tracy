@@ -38,5 +38,10 @@ if not defined VSINSTALL (
     echo ERROR: Could not find a Visual Studio installation with MSVC tools.
     exit /b 1
 )
-call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul || exit /b 1
+set "TRACY_WINDOWS_ARCH=%VSCMD_ARG_TGT_ARCH%"
+if not defined TRACY_WINDOWS_ARCH set "TRACY_WINDOWS_ARCH=%PROCESSOR_ARCHITECTURE%"
+if /I "%TRACY_WINDOWS_ARCH%"=="AMD64" set "TRACY_WINDOWS_ARCH=x64"
+if /I "%TRACY_WINDOWS_ARCH%"=="ARM64" set "TRACY_WINDOWS_ARCH=arm64"
+if /I "%TRACY_WINDOWS_ARCH%"=="X86" set "TRACY_WINDOWS_ARCH=x64"
+call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" %TRACY_WINDOWS_ARCH% >nul || exit /b 1
 goto :eof
