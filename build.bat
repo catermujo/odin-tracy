@@ -2,11 +2,25 @@
 
 setlocal EnableDelayedExpansion
 
+set "TRACY_WINDOWS_HOST_ARCH=%PROCESSOR_ARCHITECTURE%"
+if not defined TRACY_WINDOWS_HOST_ARCH set "TRACY_WINDOWS_HOST_ARCH=x64"
+if /I "%TRACY_WINDOWS_HOST_ARCH%"=="AMD64" set "TRACY_WINDOWS_HOST_ARCH=x64"
+if /I "%TRACY_WINDOWS_HOST_ARCH%"=="ARM64" set "TRACY_WINDOWS_HOST_ARCH=arm64"
+
+set "TRACY_WINDOWS_ARCH=%VSCMD_ARG_TGT_ARCH%"
+if not defined TRACY_WINDOWS_ARCH set "TRACY_WINDOWS_ARCH=%TRACY_WINDOWS_HOST_ARCH%"
+if /I "%TRACY_WINDOWS_ARCH%"=="AMD64" set "TRACY_WINDOWS_ARCH=x64"
+if /I "%TRACY_WINDOWS_ARCH%"=="ARM64" set "TRACY_WINDOWS_ARCH=arm64"
+if /I "%TRACY_WINDOWS_ARCH%"=="X86" set "TRACY_WINDOWS_ARCH=x64"
+
 call :ensure_msvc || exit /b 1
 
 if not exist tracy (
     git clone --recurse-submodules https://github.com/wolfpld/tracy -b v0.13.0 --depth=1 || exit /b 1
 )
+
+set "OUTPUT_DIR=windows_%TRACY_WINDOWS_ARCH%"
+if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
 
 echo Configuring build...
 REM DUMBAI: Use the bootstrapped MSVC toolchain because cmd.exe does not understand Unix-style CXX=... prefixes.
@@ -17,7 +31,7 @@ cmake --build build\tracy-profiler --config Release --parallel || exit /b 1
 
 REM DUMBAI: Emit the static library name the Odin bindings link against on Windows.
 cl /c /MT /O2 /DTRACY_ENABLE tracy\public\TracyClient.cpp /Fotracy.obj || exit /b 1
-lib /OUT:tracy.lib tracy.obj || exit /b 1
+lib /OUT:%OUTPUT_DIR%\tracy.lib tracy.obj || exit /b 1
 if exist tracy.obj del tracy.obj
 
 echo Build completed successfully!
@@ -38,10 +52,5 @@ if not defined VSINSTALL (
     echo ERROR: Could not find a Visual Studio installation with MSVC tools.
     exit /b 1
 )
-set "TRACY_WINDOWS_ARCH=%VSCMD_ARG_TGT_ARCH%"
-if not defined TRACY_WINDOWS_ARCH set "TRACY_WINDOWS_ARCH=%PROCESSOR_ARCHITECTURE%"
-if /I "%TRACY_WINDOWS_ARCH%"=="AMD64" set "TRACY_WINDOWS_ARCH=x64"
-if /I "%TRACY_WINDOWS_ARCH%"=="ARM64" set "TRACY_WINDOWS_ARCH=arm64"
-if /I "%TRACY_WINDOWS_ARCH%"=="X86" set "TRACY_WINDOWS_ARCH=x64"
-call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" %TRACY_WINDOWS_ARCH% >nul || exit /b 1
+call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" %TRACY_WINDOWS_HOST_ARCH% %TRACY_WINDOWS_ARCH% >nul || exit /b 1
 goto :eof

@@ -3,9 +3,21 @@ package tracy
 @(require) import "core:c"
 
 when ODIN_OS == .Darwin {
-    foreign import tracy "tracy.dylib"
+    when ODIN_ARCH == .amd64 {
+        foreign import tracy "darwin_x64/tracy.dylib"
+    } else when ODIN_ARCH == .arm64 {
+        foreign import tracy "darwin_arm64/tracy.dylib"
+    } else {
+        #panic("vendor/tracy supports Darwin amd64/arm64 only")
+    }
 } else when ODIN_OS == .Windows {
-    foreign import tracy "tracy.lib"
+    when ODIN_ARCH == .amd64 {
+        foreign import tracy "windows_x64/tracy.lib"
+    } else when ODIN_ARCH == .arm64 {
+        foreign import tracy "windows_arm64/tracy.lib"
+    } else {
+        #panic("vendor/tracy supports windows amd64/arm64 only")
+    }
 } else when ODIN_OS == .Linux {
     when ODIN_ARCH == .amd64 {
         foreign import tracy "linux_x64/tracy.so"

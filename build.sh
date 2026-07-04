@@ -12,6 +12,14 @@ linux_arch_dir() {
     esac
 }
 
+darwin_arch_dir() {
+    case "$(uname -m)" in
+        x86_64 | amd64) echo "darwin_x64" ;;
+        aarch64 | arm64) echo "darwin_arm64" ;;
+        *) echo "darwin_$(uname -m)" ;;
+    esac
+}
+
 echo "Building project..."
 CMAKE_OPTS=(-D CMAKE_BUILD_TYPE=Release)
 if [ "$(uname -s)" = 'Linux' ]; then
@@ -32,11 +40,11 @@ fi
 CXX=clang++ CC=clang cmake -G Ninja -S tracy/profiler -B build/tracy-profiler "${CMAKE_OPTS[@]}"
 cmake --build build/tracy-profiler --config Release --parallel
 if [ $(uname -s) = 'Darwin' ]; then
-    c++ -stdlib=libc++ -mmacosx-version-min=10.8 -std=c++11 -DTRACY_ENABLE -O2 -dynamiclib tracy/public/TracyClient.cpp -o tracy.dylib
-    # cp build/lib/libjoltc.dylib ../
+    ARCH_DIR=$(darwin_arch_dir)
+    mkdir -p "$ARCH_DIR"
+    c++ -stdlib=libc++ -mmacosx-version-min=10.8 -std=c++11 -DTRACY_ENABLE -O2 -dynamiclib tracy/public/TracyClient.cpp -o "$ARCH_DIR/tracy.dylib"
 else
     ARCH_DIR=$(linux_arch_dir)
     mkdir -p "$ARCH_DIR"
     c++ -std=c++11 -DTRACY_ENABLE -O2 tracy/public/TracyClient.cpp -shared -fPIC -o "$ARCH_DIR/tracy.so"
-    # cp build/lib/libjoltc.so ../
 fi
